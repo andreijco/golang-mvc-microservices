@@ -3,26 +3,33 @@ package controllers
 import (
 	"encoding/json"
 	"golang/micro/services"
+	"golang/micro/utils"
 	"net/http"
 	"strconv"
 )
 
 
 func GetUser(resp http.ResponseWriter, req *http.Request) {
-	userIdParam := req.URL.Query().Get("user_id")
-	userId, err := strconv.ParseInt(userIdParam, 10, 64)
+	userId, err := strconv.ParseInt(req.URL.Query().Get("user_id"), 10, 64)
 	if err != nil {
-		// Just return the Bad Request to the client.
-		resp.WriteHeader(http.StatusBadRequest)
-		resp.Write([]byte("user_id must be a number"))
+		apiErr := &utils.ApplicationError{
+			Message: "user_id must be a number",
+			StatusCode: http.StatusBadRequest,
+			Code: "bad_request",
+		}
+
+		jsonValue, _ := json.Marshal(apiErr)
+		resp.WriteHeader(apiErr.StatusCode)
+		resp.Write(jsonValue)
 		return
 	}
 
-	user, err := services.GetUser(userId)
-	if err != nil {
+	user, apiErr := services.GetUser(userId)
+	if apiErr != nil {
 		// Handle the err and return to the client
+		jsonValue, _ := json.Marshal(apiErr)
 		resp.WriteHeader(http.StatusNotFound)
-		resp.Write([]byte(err.Error()))
+		resp.Write(jsonValue)
 		return
 	}
 
