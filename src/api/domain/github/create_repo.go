@@ -32,7 +32,7 @@ type CreateRepoResponse struct {
 
 type RepoOwner struct {
 	Id      int64  `json:"id"`
-	Login   string `json:"name"`
+	Login   string `json:"login"`
 	Url     string `json:"url"`
 	HtmlUrl string `json:"html_url"`
 }
